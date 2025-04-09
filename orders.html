@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тапсырыс жүйесі</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #002353;
+      --secondary: #ef5026;
+      --light-gray: #f8f9fc;
+      --mid-gray: #e0e0e0;
+      --dark-gray: #666;
+      --white: #ffffff;
+      --card-shadow: 0 8px 20px rgba(0, 35, 83, 0.08);
+      --hover-shadow: 0 12px 30px rgba(0, 35, 83, 0.12);
+      --border-radius: 12px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light-gray);
+      color: var(--primary);
+      line-height: 1.6;
+      padding-bottom: 40px;
+    }
+    
+    /* Header Styling */
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #0a3a78 100%);
+      color: var(--white);
+      padding: 30px 40px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      z-index: 0;
+    }
+    
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    /* Navigation Styling */
+    nav {
+      background-color: var(--white);
+      padding: 15px 40px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--primary);
+      font-weight: 500;
+      position: relative;
+      padding: 5px 0;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-links a:hover {
+      color: var(--secondary);
+    }
+    
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--secondary);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 0 40px;
+    }
+    
+    .analytics-container {
+      display: grid;
+      grid-template-columns: 3fr 1.5fr;
+      gap: 30px;
+    }
+    
+    /* Card Styling */
+    .card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-top: 4px solid var(--primary);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--hover-shadow);
+    }
+    
+    .card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+    }
+    
+    .card h3::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 20px;
+      background-color: var(--secondary);
+      margin-right: 10px;
+      border-radius: 4px;
+    }
+    
+    .subtitle {
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--dark-gray);
+      padding-left: 18px;
+    }
+    
+    /* Form Styling */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+      gap: 20px;
+    }
+    
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 15px;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--mid-gray);
+      border-radius: 6px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(239, 80, 38, 0.1);
+    }
+    
+    .unit {
+      position: absolute;
+      right: 10px;
+      top: 12px;
+      color: var(--dark-gray);
+    }
+    
+    button {
+      background: linear-gradient(90deg, var(--secondary) 0%, #ff6e42 100%);
+      color: var(--white);
+      border: none;
+      padding: 14px 30px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(239, 80, 38, 0.3);
+    }
+    
+    .filter-button {
+      background: linear-gradient(90deg, var(--primary) 0%, #0a3a78 100%);
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+    
+    .order-btn {
+      width: 100%;
+    }
+    
+    /* Filter Section */
+    .filter-section {
+      margin-top: 30px;
+    }
+    
+    .filter-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    /* Table Styling */
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .table th, .table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--mid-gray);
+    }
+    
+    .table th {
+      background-color: rgba(0, 35, 83, 0.05);
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .table tr:nth-child(even) {
+      background-color: rgba(0, 35, 83, 0.02);
+    }
+    
+    .table tr:hover {
+      background-color: rgba(239, 80, 38, 0.05);
+    }
+    
+    /* Contact Form Styling */
+    .contact-container {
+      display: flex;
+      max-width: 1200px;
+      margin: 60px auto;
+      box-shadow: var(--card-shadow);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+    
+    .contact-left {
+      flex: 1;
+      background-color: var(--white);
+      padding: 50px;
+      position: relative;
+    }
+    
+    .contact-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+    
+    .contact-right {
+      flex: 1;
+      background: linear-gradient(135deg, var(--secondary) 0%, #ff6e42 100%);
+      color: var(--white);
+      padding: 50px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .contact-right::before {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+    }
+    
+    .contact-heading {
+      font-size: 32px;
+      color: var(--secondary);
+      margin-bottom: 30px;
+      font-weight: 700;
+      position: relative;
+    }
+    
+    .contact-form .form-group {
+      margin-bottom: 25px;
+    }
+    
+    .contact-form .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--primary);
+      font-size: 15px;
+    }
+    
+    .contact-form .form-group textarea {
+      height: 120px;
+      resize: vertical;
+    }
+    
+    .submit-btn {
+      width: 100%;
+    }
+    
+    .contact-info {
+      margin-bottom: 40px;
+    }
+    
+    .contact-info h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    .contact-info h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .contact-info p {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    
+    .services h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    .services h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .services a {
+      display: block;
+      color: var(--white);
+      text-decoration: none;
+      margin-bottom: 15px;
+      font-size: 18px;
+      transition: transform 0.3s ease;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .services a::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      opacity: 0.7;
+      transition: transform 0.3s ease;
+    }
+    
+    .services a:hover {
+      transform: translateX(5px);
+    }
+    
+    .services a:hover::before {
+      opacity: 1;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 25px;
+    }
+    
+    .checkbox-container input {
+      margin-right: 12px;
+      margin-top: 6px;
+      accent-color: var(--secondary);
+      width: auto;
+    }
+    
+    .checkbox-container label {
+      font-size: 14px;
+      color: var(--dark-gray);
+    }
+    
+    canvas {
+      max-width: 100%;
+      margin-top: 10px;
+    }
+    
+    /* Status Classes */
+    .status-accepted {
+      color: #2e86de;
+      font-weight: 500;
+    }
+    
+    .status-warehouse {
+      color: #10ac84;
+      font-weight: 500;
+    }
+    
+    .status-transit {
+      color: #ff9f43;
+      font-weight: 500;
+    }
+    
+    .status-delivered {
+      color: #8854d0;
+      font-weight: 500;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .analytics-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .contact-container {
+        flex-direction: column;
+      }
+      
+      .contact-left, .contact-right {
+        padding: 30px;
+      }
+      
+      .nav-links {
+        gap: 15px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      
+      .form-group {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .container {
+        padding: 0 20px;
+      }
+      
+      header, nav {
+        padding: 20px;
+      }
+      
+      header h1 {
+        font-size: 22px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .contact-heading {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Тапсырыстар мен қойма жағдайы жүйесі</h1>
+  </header>
+
+  <div class="nav-container">
+    <ul class="nav-links">
+      <li><a href="index.html">Басты бет</a></li>
+      <li><a href="bauka.html">Қойма дашборды</a></li>
+      <li><a href="#orders">Тапсырыс қосу</a></li>
+      <li><a href="#analytics">Аналитика</a></li>
+      <li><a href="#contact">Бізбен хабарласу</a></li>
+    </ul>
+  </div>
+
+  <!-- Тапсырыс қосу формасы -->
+  <div class="container" id="orders">
+    <div class="card">
+      <h3>Тапсырыс қосу формасы</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" placeholder="Тапсырыс нөмірі">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <input type="date" placeholder="Келіп түскен күні">
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" placeholder="Клиент">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" placeholder="Жеткізу орны">
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="number" placeholder="Саны">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <input type="number" placeholder="Салмағы">
+            <span class="unit">т</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="number" placeholder="Салмағы">
+            <span class="unit">кг</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" placeholder="Ескертпе">
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <div class="input-group">
+            <input type="date" placeholder="Жөнелту күні">
+          </div>
+        </div>
+        <div class="form-group">
+          <button class="order-btn">Тапсырысты қосу</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card filter-section">
+      <h3>Тапсырыстар тізімі</h3>
+      <div class="filter-controls">
+        <select>
+          <option>Келіп түскен күні</option>
+          <option>Күні (жаңадан ескіге)</option>
+          <option>Күні (ескіден жаңаға)</option>
+        </select>
+        <select>
+          <option>Салмағы</option>
+          <option>Салмағы (кемуі бойынша)</option>
+          <option>Салмағы (өсу бойынша)</option>
+        </select>
+        <select>
+          <option>Статус</option>
+          <option>Қабылданған</option>
+          <option>Қоймада</option>
+          <option>Жолда</option>
+          <option>Жөнелтілген</option>
+        </select>
+        <button class="filter-button">Сүзгіні қолдану</button>
+      </div>
+      
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Тапсырыс нөмірі</th>
+            <th>Клиент</th>
+            <th>Келіп түскен күні</th>
+            <th>Салмағы</th>
+            <th>Статус</th>
+            <th>Жөнелту күні</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1001</td>
+            <td>Клиент A</td>
+            <td>2024-05-01</td>
+            <td>10,2 кг</td>
+            <td class="status-accepted">Қабылданған</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>1002</td>
+            <td>Клиент B</td>
+            <td>2024-05-01</td>
+            <td>15,5 кг</td>
+            <td class="status-warehouse">Қоймада</td>
+            <td>2024-05-05</td>
+          </tr>
+          <tr>
+            <td>1003</td>
+            <td>Клиент C</td>
+            <td>2024-05-01</td>
+            <td>8,3 кг</td>
+            <td class="status-transit">Жолда</td>
+            <td>2024-05-03</td>
+          </tr>
+          <tr>
+            <td>1004</td>
+            <td>Клиент D</td>
+            <td>2024-05-01</td>
+            <td>12,7 кг</td>
+            <td class="status-delivered">Жөнелтілген</td>
+            <td>2024-05-02</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Аналитика -->
+  <div class="container" id="analytics">
+    <div class="analytics-container">
+      <div>
+        <div class="card">
+          <h3>Тапсырыс туралы есептер</h3>
+          <p class="subtitle">Күн сайынғы тапсырыстар санының өзгерісі</p>
+          <canvas id="ordersChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>Сатылымдар және қоймадағы өнімдер статистикасы</h3>
+          <p class="subtitle">Негізгі өнімдер бойынша сатылым және қоймада қалдықтар</p>
+          <canvas id="inventoryChart"></canvas>
+        </div>
+
+        <div class="card">
+          <h3>Уақытша есептер мен кезекті тапсырыстар</h3>
+          <p class="subtitle">Қазіргі тапсырыстардың күйі бойынша бөлінуі</p>
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Аудитория (елдер бойынша)</h3>
+          <table class="table">
+            <tr><th>Ел</th><th>Көру</th><th>Сессия</th><th>Басу</th><th>Қол жету</th></tr>
+            <tr><td>Sweden</td><td>50,641</td><td>20,600</td><td>18,532</td><td>21,542</td></tr>
+            <tr><td>Denmark</td><td>50,235</td><td>20,432</td><td>18,157</td><td>20,984</td></tr>
+            <tr><td>France</td><td>49,652</td><td>20,093</td><td>17,542</td><td>17,753</td></tr>
+            <tr><td>Spain</td><td>47,631</td><td>19,532</td><td>17,346</td><td>17,236</td></tr>
+            <tr><td>Italy</td><td>47,042</td><td>19,055</td><td>16,742</td><td>16,752</td></tr>
+            <tr><td>Germany</td><td>44,874</td><td>17,843</td><td>16,147</td><td>15,653</td></tr>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>Интерактивті диаграммалар мен графиктер</h3>
+          <p class="subtitle">Трафик көздері бойынша статистика</p>
+          <canvas id="trafficChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Контактная форма -->
+  <div class="contact-container" id="contact">
+    <div class="contact-left">
+      <h2 class="contact-heading">БІЗБЕН ХАБАРЛАСУ</h2>
+      <form class="contact-form">
+        <div class="form-group">
+          <label for="name">Аты-жөніңіз</label>
+          <input type="text" id="name" placeholder="атыңызды енгізіңіз">
+        </div>
+        
+        <div class="form-group">
+          <label for="email">электрондық поштаңыз</label>
+          <input type="email" id="email" placeholder="электрондық пошта мекенжайын енгізіңіз">
+        </div>
+        
+        <div class="form-group">
+          <label for="message">Хабарлама</label>
+          <textarea id="message"></textarea>
+        </div>
+        
+        <div class="checkbox-container">
+          <input type="checkbox" id="terms">
+          <label for="terms">Қызмет көрсету шарттарын қабылдаймын</label>
+        </div>
+        
+        <button type="submit" class="submit-btn">ЖІБЕРУ</button>
+      </form>
+    </div>
+    
+    <div class="contact-right">
+      <div class="contact-info">
+        <h2>БАЙЛАНЫС НОМЕРІ</h2>
+        <p>+7 (777) 777-88-99</p>
+        <p>1 (234) 987-654</p>
+      </div>
+      
+      <div class="contact-info">
+        <h2>ОРЫНЫ</h2>
+        <p>Алмалы шағын ауданы,</p>
+        <p>Төле би көшесі 59</p>
+      </div>
+      
+      <div class="services">
+        <h2>БІЗДІҢ ҚЫЗМЕТТЕРІМІЗ</h2>
+        <a href="#">Жоспарлау</a>
+        <a href="#">Сақтау</a>
+        <a href="#">Бақылау</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Улучшенные настройки для графиков
+    const chartOptions = {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              family: 'Poppins',
+              size: 12
+            }
+          }
+        }
+      }
+    };
+    
+    // Линейный график
+    new Chart(document.getElementById('ordersChart'), {
+      type: 'line',
+      data: {
+        labels: ['01', '02', '03', '04', '05', '06', '07'],
+        datasets: [{
+          label: 'Тапсырыстар саны',
+          data: [120, 150, 180, 170, 200, 230, 220],
+          borderColor: '#ef5026',
+          backgroundColor: 'rgba(239, 80, 38, 0.2)',
+          tension: 0.3,
+          fill: true,
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#ef5026',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        ...chartOptions,
+        scales: {
+          y: { 
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+    // Столбчатый график
+    new Chart(document.getElementById('inventoryChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Өнім A', 'Өнім B', 'Өнім C', 'Өнім D'],
+        datasets: [
+          {
+            label: 'Сатылымдар',
+            data: [320, 280, 150, 400],
+            backgroundColor: 'rgba(239, 80, 38, 0.8)',
+            borderRadius: 4
+          },
+          {
+            label: 'Қоймадағы қалдықтар',
+            data: [120, 100, 200, 80],
+            backgroundColor: 'rgba(0, 35, 83, 0.8)',
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        ...chartOptions,
+        scales: {
+          y: { 
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+    // Круговой график
+    new Chart(document.getElementById('statusChart'), {
+      type: 'pie',
+      data: {
+        labels: ['Өңделіп жатыр', 'Дайын', 'Жеткізілді'],
+        datasets: [{
+          data: [30, 50, 70],
+          backgroundColor: [
+            'rgba(239, 80, 38, 0.8)',
+            'rgba(0, 35, 83, 0.8)',
+            'rgba(248, 196, 113, 0.8)'
+          ],
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: chartOptions
+    });
+
+    // Кольцевой график
+    new Chart(document.getElementById('trafficChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Іздеу жүйесі', 'Ақылы жарнама', 'Тікелей кірулер', 'Әлеуметтік желі'],
+        datasets: [{
+          data: [60, 20, 10, 10],
+          backgroundColor: [
+            'rgba(0, 35, 83, 0.8)',
+            'rgba(239, 80, 38, 0.8)',
+            'rgba(108, 117, 125, 0.8)',
+            'rgba(248, 196, 113, 0.8)'
+          ],
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        ...chartOptions,
+        cutout: '65%'
+      }
+    });
+  </script>
+</body>
+</html>

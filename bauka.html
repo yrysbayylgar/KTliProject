@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <title>Қойма дашборды</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 999px;
+      width: 250px;
+      margin-bottom: 20px;
+      background-color: #fff;
+    }
+
+    .search-icon {
+      width: 20px;
+      height: 20px;
+      fill: #555;
+    }
+
+    .search-placeholder {
+      flex-grow: 1;
+      color: #999;
+      font-family: sans-serif;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background-color: #fff;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .green { background-color: #28a745; }
+    .red { background-color: #dc3545; }
+    .yellow { background-color: #ffc107; }
+
+    .robot-status {
+      margin: 4px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: sans-serif;
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+      font-weight: normal;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: 150px !important;
+      width: 150px !important;
+      margin: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div style="background-color: #007bff; padding: 10px; margin-bottom: 20px; border-radius: 8px;">
+    <nav style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+      <div style="font-weight: bold; color: white; font-size: 18px;">Қойма дашборды</div>
+      <div>
+        <a href="index.html" style="color: white; text-decoration: none; margin-right: 15px;">Басты бет</a>
+        <a href="orders.html" style="color: white; text-decoration: none;">Тапсырыстар</a>
+      </div>
+    </nav>
+  </div>
+
+<!-- Іздеу үлгісі -->
+<div class="search-container">
+  <svg class="search-icon" viewBox="0 0 24 24">
+    <path d="M10,2A8,8 0 0,1 18,10C18,11.85 17.28,13.55 16.06,14.84L21.71,20.5L20.29,21.91L14.64,16.25C13.35,17.47 11.65,18.19 9.8,18.19A8,8 0 0,1 10,2M10,4A6,6 0 1,0 16,10A6,6 0 0,0 10,4Z" />
+  </svg>
+  <div class="search-placeholder">Іздеу...</div>
+</div>
+
+<!-- Ақпарат кестесі -->
+<table>
+  <tr>
+    <th>Атауы</th>
+    <th>Ақпарат</th>
+  </tr>
+  <tr>
+    <td>Тапсырыстың орналасуы</td>
+    <td>Тапсырыстың орналасуы туралы ақпарат</td>
+  </tr>
+  <tr>
+    <td>Тапсырыс қашан келді</td>
+    <td>Келу уақыты туралы ақпарат</td>
+  </tr>
+  <tr>
+    <td>Қоймадан қашан шығару керек</td>
+    <td>Шығару мерзімі туралы ақпарат</td>
+  </tr>
+  <tr>
+    <td>Тапсырыс берушінің аты</td>
+    <td>Аты туралы ақпарат</td>
+  </tr>
+  <tr>
+    <td>Тапсырыс берушінің байланыс ақпараты</td>
+    <td>Байланыс ақпараты</td>
+  </tr>
+  <tr>
+    <td>Жеткізушінің атауы</td>
+    <td>Жеткізуші туралы ақпарат</td>
+  </tr>
+  <tr>
+    <td>Жеткізушінің байланыс ақпараты</td>
+    <td>Байланыс ақпараты</td>
+  </tr>
+</table>
+
+<!-- Дашборд -->
+<div class="dashboard">
+  <!-- Тиімділік диаграммасы -->
+  <div class="card">
+    <h2 style="font-size: 18px">📈 Тапсырыстар тиімділігі</h2>
+    <canvas id="efficiencyChart"></canvas>
+  </div>
+
+  <!-- Роботтар статусы -->
+  <div class="card">
+    <h2 style="font-size: 18px">🤖 Роботтар</h2>
+    <div class="robot-status"><span class="status-indicator green"></span>Робот A1 – Жұмыс үстінде</div>
+    <div class="robot-status"><span class="status-indicator red"></span>Робот B2 – Істен шыққан</div>
+    <div class="robot-status"><span class="status-indicator yellow"></span>Робот C3 – Тапсырманы күтуде</div>
+  </div>
+    <!-- Кестеден кешіккен тапсырыстар -->
+    <div class="card" style="grid-column: span 2;">
+        <h2>⏰ Кестеден кешіккен тапсырыстар</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Тапсырыс №</th>
+              <th>Клиент</th>
+              <th>Күтілген жөнелту уақыты</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#00124</td>
+              <td>Иванов И.И.</td>
+              <td>09:30</td>
+              <td>Дайын, бірақ жөнелтілмеген</td>
+            </tr>
+            <tr>
+              <td>#00127</td>
+              <td>"Логистик+" ЖШС</td>
+              <td>10:00</td>
+              <td>Қаптаманы күтуде</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <script>
+      const ctx = document.getElementById('efficiencyChart').getContext('2d');
+      const efficiencyChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Жөнелтілді', 'Күтілген'],
+          datasets: [{
+            label: 'Бүгінгі тапсырыстар',
+            data: [85, 15],
+            backgroundColor: [
+              'rgba(40, 167, 69, 0.7)',
+              'rgba(220, 53, 69, 0.7)'
+            ],
+            borderColor: [
+              'rgba(40, 167, 69, 1)',
+              'rgba(220, 53, 69, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    </script>
+    
+    </body>
+    </html>
